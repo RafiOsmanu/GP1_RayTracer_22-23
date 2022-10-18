@@ -40,8 +40,15 @@ namespace dae
 	float Vector4::Dot(const Vector4& v1, const Vector4& v2)
 	{
 		//todo W1
-		assert(false && "Not Implemented Yet");
-		return {};
+		float dotResult;
+		dotResult = (v1.Normalized().x * v2.Normalized().x) + 
+			(v1.Normalized().y * v2.Normalized().y) + 
+			(v1.Normalized().z * v2.Normalized().z) +
+			(v1.Normalized().w * v2.Normalized().w);
+
+		//assert(false && "Not Implemented Yet");
+		return { dotResult };
+
 	}
 
 #pragma region Operator Overloads

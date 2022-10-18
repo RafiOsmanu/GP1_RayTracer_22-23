@@ -12,10 +12,45 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
+			//analyitic use of ray and sphere intersection
+			float A{ Vector3::Dot(ray.direction, ray.direction) };
+			float B{ Vector3::Dot((2 * ray.direction), (ray.origin - sphere.origin)) };
+			float C{ (Vector3::Dot((ray.origin - sphere.origin), (ray.origin - sphere.origin))) - (sphere.radius * sphere.radius) };
+			float tMin{ ray.min };
+			float tMax{ ray.max };
+
+
+			float D{ (B * B) - (4 * A * C) };
+
 			//todo W1
-			assert(false && "No Implemented Yet!");
+
+			if (D < 0)
+			{
+				hitRecord.didHit = false;
+				return false;
+			}
+			else
+			{
+
+				float SquareD{ std::sqrtf(D) };
+				float t{ (-B - (SquareD)) / 2 * A };
+
+				if (t >= tMin && t <= tMax)
+				{
+					if (ignoreHitRecord) return true;
+
+					hitRecord.didHit = true;
+					hitRecord.t = t;
+					hitRecord.origin = ray.origin + (hitRecord.t * ray.direction);
+					hitRecord.materialIndex = sphere.materialIndex;
+					hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
+					return true;
+				}
+			}
 			return false;
 		}
+			//assert(false && "No Implemented Yet!");
+		
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
 		{
@@ -28,8 +63,26 @@ namespace dae
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//todo W1
-			assert(false && "No Implemented Yet!");
-			return false;
+			float t{ Vector3::Dot((plane.origin - ray.origin), plane.normal) / Vector3::Dot(ray.direction, plane.normal) };
+			float tMin{ ray.min };
+			float tMax{ ray.max };
+			
+			if (t > tMin  && t <= tMax)
+			{
+				if (!ignoreHitRecord)
+				{
+					hitRecord.t = t;
+					hitRecord.materialIndex = plane.materialIndex;
+					hitRecord.normal = plane.normal;
+					hitRecord.didHit = true;
+
+					hitRecord.origin = ray.origin + (ray.direction * t);
+				}
+				return true;
+			}
+			
+			return false; 
+			//assert(false && "No Implemented Yet!");
 		}
 
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray)
@@ -75,15 +128,23 @@ namespace dae
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
 			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+			//assert(false && "No Implemented Yet!");
+
+			return {light.origin - origin};
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
 			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+
+			if (light.type == LightType::Directional)
+			{
+				return light.intensity * light.color;
+			}
+
+			Vector3 pointToShade{ light.origin - target };
+			
+			return { light.color * (light.intensity / pointToShade.SqrMagnitude()) };//.SqrMagnitude())};
 		}
 	}
 

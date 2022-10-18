@@ -36,6 +36,7 @@ namespace dae
 	public:
 		Material_SolidColor(const ColorRGB& color): m_Color(color)
 		{
+
 		}
 
 		ColorRGB Shade(const HitRecord& hitRecord, const Vector3& l, const Vector3& v) override
@@ -59,9 +60,10 @@ namespace dae
 
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
+
 			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			
+			return { BRDF::Lambert(m_DiffuseReflectance, m_DiffuseColor) };
 		}
 
 	private:
@@ -85,8 +87,9 @@ namespace dae
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
 			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			
+			return { BRDF::Lambert(m_DiffuseReflectance, m_DiffuseColor)
+			+ BRDF::Phong(m_SpecularReflectance, m_PhongExponent, l , v, hitRecord.normal)};
 		}
 
 	private:
@@ -110,8 +113,27 @@ namespace dae
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
 			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			Vector3 halfVector{(l + v).Normalized()};
+			const ColorRGB f0{ m_Metalness == 0.f ? ColorRGB{ 0.04f, 0.04f, 0.04f }: m_Albedo };
+			
+		
+
+			float D{ BRDF::NormalDistribution_GGX(hitRecord.normal, halfVector, Square(m_Roughness)) };
+			ColorRGB F{ BRDF::FresnelFunction_Schlick(halfVector, v, f0) };
+			float G{ BRDF::GeometryFunction_Smith(hitRecord.normal, v, l, Square(m_Roughness)) };
+			
+			float cTdeminator{ (4.f * Vector3::Dot(v, hitRecord.normal) * Vector3::Dot(l, hitRecord.normal)) };
+			ColorRGB cookTorrence{D * F * G};
+			ColorRGB SpecularKs{ D * F.r * G / cTdeminator, D * F.g * G / cTdeminator, D * F.b * G / cTdeminator };
+
+			const float kd{ m_Metalness == 0.f ? 1.f - f0.r : 0.f };
+			
+
+			
+			return{ BRDF::Lambert(kd, m_Albedo) + SpecularKs };
+
+			//BRDF::NormalDistribution_GGX(hitRecord.normal, halfVector, m_Roughness) *
+			// * BRDF::FresnelFunction_Schlick(halfVector, v, m_Albedo)
 		}
 
 	private:

@@ -22,6 +22,13 @@ void ShutDown(SDL_Window* pWindow)
 
 int main(int argc, char* args[])
 {
+
+	//test
+	/*float dotresult{};
+	dotresult = Vector3::Dot(Vector3::UnitX, -Vector3::UnitX);*/
+	/*Vector3 crossResult{};
+	crossResult = Vector3::Cross(Vector3::UnitX, Vector3::UnitZ);*/
+
 	//Unreferenced parameters
 	(void)argc;
 	(void)args;
@@ -33,7 +40,7 @@ int main(int argc, char* args[])
 	const uint32_t height = 480;
 
 	SDL_Window* pWindow = SDL_CreateWindow(
-		"RayTracer - **Insert Name**",
+		"RayTracer - **Rafi Osmanu**",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height, 0);
@@ -45,7 +52,7 @@ int main(int argc, char* args[])
 	const auto pTimer = new Timer();
 	const auto pRenderer = new Renderer(pWindow);
 
-	const auto pScene = new Scene_W1();
+	const auto pScene = new Scene_W3();
 	pScene->Initialize();
 
 	//Start loop
@@ -53,8 +60,10 @@ int main(int argc, char* args[])
 	float printTimer = 0.f;
 	bool isLooping = true;
 	bool takeScreenshot = false;
+	
 	while (isLooping)
 	{
+		//SDL_SetRelativeMouseMode(SDL_TRUE);
 		//--------- Get input events ---------
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
@@ -67,6 +76,10 @@ int main(int argc, char* args[])
 			case SDL_KEYUP:
 				if(e.key.keysym.scancode == SDL_SCANCODE_X)
 					takeScreenshot = true;
+				else if(e.key.keysym.scancode == SDL_SCANCODE_F2)
+					pRenderer->ToggleShadows();
+				else if (e.key.keysym.scancode == SDL_SCANCODE_F3)
+					pRenderer->CycleLightingMode();
 				break;
 			}
 		}
